@@ -1,0 +1,23 @@
+
+# Build output:
+build/
+build-*/
+out/
+Debug/
+
+# Binaries:
+*.a
+*.o
+*.dll
+*.lib
+*.exe
+*.out
+
+# Temporaries:
+*.swp
+
+# PyCharm:
+.idea/
+*.iml
+venv/
+
