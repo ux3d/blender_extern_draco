@@ -4,6 +4,7 @@ build/
 build-*/
 out/
 Debug/
+cmake-build-*/
 
 # Binaries:
 *.a
@@ -13,11 +14,16 @@ Debug/
 *.exe
 *.out
 
+# Blender Python packages:
+addons/bpy/
+addons/bpy_extras/
+addons/io_scene_gltf2/
+
 # Temporaries:
 *.swp
+__pycache__/
 
 # PyCharm:
 .idea/
 *.iml
 venv/
-
