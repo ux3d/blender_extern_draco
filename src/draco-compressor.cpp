@@ -11,7 +11,7 @@
 #if defined(_MSC_VER)
 #define DLL_EXPORT(retType) extern "C" __declspec(dllexport) retType __cdecl
 #else
-#define DLL_EXPORT(retType) extern "C" retType __cdecl
+#define DLL_EXPORT(retType) extern "C" retType
 #endif
 
 /**
