@@ -14,6 +14,8 @@
 #define DLL_EXPORT(retType) extern "C" retType
 #endif
 
+const char *logTag = "DRACO-COMPRESSOR";
+
 /**
  * This tuple is opaquely exposed to Python through a pointer.
  * It encapsulates the complete current compressor state.
@@ -54,6 +56,16 @@ struct DracoCompressor {
      * Required to be reported in the GLTF file.
      */
     std::vector<uint32_t> texCoordAttributeIds;
+
+    /**
+     * Level of compression [0-10].
+     * Higher values mean slower encoding.
+     */
+    uint32_t compressionLevel = 7;
+
+    uint32_t quantizationBitsPosition = 14;
+    uint32_t quantizationBitsNormal = 10;
+    uint32_t quantizationBitsTexCoord = 12;
 };
 
 draco::GeometryAttribute createAttribute(
@@ -78,15 +90,61 @@ DLL_EXPORT(DracoCompressor *) createCompressor() {
     return new DracoCompressor;
 }
 
-DLL_EXPORT(void) compress(
+DLL_EXPORT(void) setCompressionLevel(
+        DracoCompressor *compressor,
+        uint32_t compressionLevel
+) {
+    compressor->compressionLevel = compressionLevel;
+}
+
+DLL_EXPORT(void) setPositionQuantizationBits(
+        DracoCompressor *compressor,
+        uint32_t quantizationBitsPosition
+) {
+    compressor->quantizationBitsPosition = quantizationBitsPosition;
+}
+
+DLL_EXPORT(void) setNormalQuantizationBits(
+        DracoCompressor *compressor,
+        uint32_t quantizationBitsNormal
+) {
+    compressor->quantizationBitsNormal = quantizationBitsNormal;
+}
+
+DLL_EXPORT(void) setTexCoordQuantizationBits(
+        DracoCompressor *compressor,
+        uint32_t quantizationBitsTexCoord
+) {
+    compressor->quantizationBitsTexCoord = quantizationBitsTexCoord;
+}
+
+DLL_EXPORT(bool) compress(
         DracoCompressor *compressor
 ) {
-    draco::EncoderOptions local_options = draco::EncoderOptions::CreateDefaultOptions();
+    printf("%s: Compressing primitive:\n", logTag);
+    printf("%s: Compression level [0-10]:   %d\n", logTag, compressor->compressionLevel);
+    printf("%s: Position quantization bits: %d\n", logTag, compressor->quantizationBitsPosition);
+    printf("%s: Normal quantization bits:   %d\n", logTag, compressor->quantizationBitsNormal);
+    printf("%s: Position quantization bits: %d\n", logTag, compressor->quantizationBitsTexCoord);
+
     draco::ExpertEncoder encoder(compressor->mesh);
-    encoder.Reset(local_options);
+
+    encoder.SetSpeedOptions(10 - compressor->compressionLevel, 10 - compressor->compressionLevel);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantizationBitsPosition);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantizationBitsNormal);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantizationBitsTexCoord);
+
     encoder.SetEncodingMethod(draco::MESH_EDGEBREAKER_ENCODING);
 
     draco::Status result = encoder.EncodeToBuffer(&compressor->encoderBuffer);
+
+    if(!result.ok()) {
+        printf("%s: Could not compress mesh: %s\n", logTag, result.error_msg());
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 
 /**
@@ -186,7 +244,7 @@ DLL_EXPORT(void) setFaces(
         }
         default:
         {
-            printf("Unsupported index size %d\n", bytesPerIndex);
+            printf("%s: Unsupported index size %d\n", logTag, bytesPerIndex);
             break;
         }
     }
@@ -232,7 +290,7 @@ void addFloatAttribute(
     compressor->buffers.emplace_back(std::move(buffer));
 }
 
-DLL_EXPORT(void) addPositions(
+DLL_EXPORT(void) addPositionAttribute(
         DracoCompressor *compressor,
         uint32_t count,
         float *source
@@ -240,7 +298,7 @@ DLL_EXPORT(void) addPositions(
     addFloatAttribute(compressor, draco::GeometryAttribute::POSITION, count, 3, source);
 }
 
-DLL_EXPORT(void) addNormals(
+DLL_EXPORT(void) addNormalAttribute(
         DracoCompressor *compressor,
         uint32_t count,
         float *source
@@ -248,7 +306,7 @@ DLL_EXPORT(void) addNormals(
     addFloatAttribute(compressor, draco::GeometryAttribute::NORMAL, count, 3, source);
 }
 
-DLL_EXPORT(void) addTexcoords(
+DLL_EXPORT(void) addTexCoordAttribute(
         DracoCompressor *compressor,
         uint32_t count,
         float *source
