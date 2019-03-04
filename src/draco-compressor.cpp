@@ -12,7 +12,7 @@
  * pointing to the newly created buffer containing the compressed data.
  *
  * @author Jim Eckerlein <eckerlein@ux3d.io>
- * @date   2019-01-15
+ * @date   2019-03-04
  */
 
 #include <iostream>
