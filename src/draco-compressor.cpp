@@ -1,3 +1,20 @@
+/**
+ * Implemententation for the Draco exporter from the C++ side.
+ *
+ * The python side uses the CTypes libary to open the DLL, load function
+ * pointers add pass the data to the compressor as raw bytes.
+ *
+ * The compressor intercepts the regular GLTF exporter after data has been
+ * gathered and right before the data is converted to a JSON representation,
+ * which is going to be written out.
+ *
+ * The original uncompressed data is removed and replaces an extension,
+ * pointing to the newly created buffer containing the compressed data.
+ *
+ * @author Jim Eckerlein <eckerlein@ux3d.io>
+ * @date   2019-01-15
+ */
+
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -8,12 +25,17 @@
 #include "draco/core/vector_d.h"
 #include "draco/io/mesh_io.h"
 
+// Symbols to exported must be decorated with an attribute under Windows.
+// Use C linkage to avoid name mangling.
 #if defined(_MSC_VER)
 #define DLL_EXPORT(retType) extern "C" __declspec(dllexport) retType __cdecl
 #else
 #define DLL_EXPORT(retType) extern "C" retType
 #endif
 
+/**
+ * Prefix used for logging messages.
+ */
 const char *logTag = "DRACO-COMPRESSOR";
 
 /**
@@ -158,8 +180,8 @@ DLL_EXPORT(uint64_t) compressedSize(
 
 /**
  * Copies the compressed mesh into the given byte buffer.
- * @param[o_data] A Python `bytes` object.
  *
+ * @param[o_data] A Python `bytes` object.
  */
 DLL_EXPORT(void) copyToBytes(
         DracoCompressor *compressor,
