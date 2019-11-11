@@ -152,12 +152,17 @@ DLL_EXPORT(bool) compress(
 
     draco::Encoder encoder;
 
+    encoder.SetTrackEncodedProperties(true);
     encoder.SetSpeedOptions(10 - compressor->compressionLevel, 10 - compressor->compressionLevel);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantizationBitsPosition);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantizationBitsNormal);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantizationBitsTexCoord);
 
+
     draco::Status result = encoder.EncodeMeshToBuffer(compressor->mesh, &compressor->encoderBuffer);
+	printf("%s: Num encoded points: %zu\n", logTag, encoder.num_encoded_points());
+	printf("%s: Num encoded faces: %zu\n", logTag, encoder.num_encoded_faces());
+
 
     if(!result.ok()) {
         printf("%s: Could not compress mesh: %s\n", logTag, result.error_msg());
