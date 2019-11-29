@@ -9,7 +9,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/2.80/python/lib/pytho
 add_subdirectory(draco EXCLUDE_FROM_ALL)
 
 # Build blender-draco-exporter DLL.
-add_library(${PROJECT_NAME} SHARED src/draco-compressor.cpp)
+add_library(${PROJECT_NAME} SHARED src/draco-compressor.cpp src/draco-compressor.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 	draco/src
