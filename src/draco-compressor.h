@@ -15,10 +15,7 @@
  * @date   2019-11-29
  */
 
-#include <vector>
-
-#include "draco/mesh/mesh.h"
-#include "draco/core/encoder_buffer.h"
+#include <cstdint>
 
 #if defined(_MSC_VER)
 #define DLL_EXPORT(retType) extern "C" __declspec(dllexport) retType __cdecl

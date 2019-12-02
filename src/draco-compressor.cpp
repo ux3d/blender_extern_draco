@@ -6,7 +6,10 @@
 #include "draco-compressor.h"
 
 #include <memory>
+#include <vector>
 
+#include "draco/mesh/mesh.h"
+#include "draco/core/encoder_buffer.h"
 #include "draco/compression/encode.h"
 
 /**
