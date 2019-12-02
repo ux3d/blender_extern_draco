@@ -86,7 +86,7 @@ compress_morphed (
  */
 DLL_EXPORT(uint64_t)
 get_compressed_size (
-        DracoCompressor *compressor
+        DracoCompressor const *compressor
 );
 
 /**
@@ -96,7 +96,7 @@ get_compressed_size (
  */
 DLL_EXPORT(void)
 copy_to_bytes (
-        DracoCompressor *compressor,
+        DracoCompressor const *compressor,
         uint8_t *o_data
 );
 
@@ -113,7 +113,7 @@ set_faces (
         DracoCompressor *compressor,
         uint32_t index_count,
         uint32_t index_byte_length,
-        uint8_t *indices
+        uint8_t const *indices
 );
 
 /// Adds a `float` position attribute to the current mesh.
@@ -122,7 +122,7 @@ DLL_EXPORT(uint32_t)
 add_positions_f32 (
     DracoCompressor *compressor,
     uint32_t count,
-    uint8_t *data
+    uint8_t const *data
 );
 
 /// Adds a `float` normal attribute to the current mesh.
@@ -131,7 +131,7 @@ DLL_EXPORT(uint32_t)
 add_normals_f32 (
     DracoCompressor *compressor,
     uint32_t count,
-    uint8_t *data
+    uint8_t const *data
 );
 
 /// Adds a `float` texture coordinate attribute to the current mesh.
@@ -140,7 +140,7 @@ DLL_EXPORT(uint32_t)
 add_uvs_f32 (
     DracoCompressor *compressor,
     uint32_t count,
-    uint8_t *data
+    uint8_t const *data
 );
 
 /// Adds a `unsigned short` joint attribute to the current mesh.
@@ -149,7 +149,7 @@ DLL_EXPORT(uint32_t)
 add_joints_u16 (
 	DracoCompressor *compressor,
 	uint32_t count,
-	uint8_t *data
+	uint8_t const *data
 );
 
 /// Adds a `float` weight attribute to the current mesh.
@@ -158,5 +158,5 @@ DLL_EXPORT(uint32_t)
 add_weights_f32 (
 	DracoCompressor *compressor,
 	uint32_t count,
-    uint8_t *data
+    uint8_t const *data
 );

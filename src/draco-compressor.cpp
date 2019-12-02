@@ -40,42 +40,42 @@ DracoCompressor *create_compressor() {
 }
 
 void set_compression_level(
-        DracoCompressor *compressor,
-        uint32_t compressionLevel
+        DracoCompressor *const compressor,
+        uint32_t const compressionLevel
 ) {
     compressor->compressionLevel = compressionLevel;
 }
 
 void set_position_quantization(
-        DracoCompressor *compressor,
-        uint32_t quantizationBitsPosition
+        DracoCompressor *const compressor,
+        uint32_t const quantizationBitsPosition
 ) {
     compressor->quantization.positions = quantizationBitsPosition;
 }
 
 void set_normal_quantization(
-        DracoCompressor *compressor,
-        uint32_t quantizationBitsNormal
+        DracoCompressor *const compressor,
+        uint32_t const quantizationBitsNormal
 ) {
     compressor->quantization.normals = quantizationBitsNormal;
 }
 
 void set_uv_quantization(
-	DracoCompressor *compressor,
-	uint32_t quantizationBitsTexCoord
+	DracoCompressor *const compressor,
+	uint32_t const quantizationBitsTexCoord
 ) {
 	compressor->quantization.uvs = quantizationBitsTexCoord;
 }
 
 void set_generic_quantization(
-	DracoCompressor *compressor,
-	uint32_t bits
+	DracoCompressor *const compressor,
+	uint32_t const bits
 ) {
 	compressor->quantization.generic = bits;
 }
 
 bool compress(
-    DracoCompressor *compressor
+    DracoCompressor *const compressor
 ) {
     draco::Encoder encoder;
 
@@ -89,7 +89,7 @@ bool compress(
 }
 
 bool compress_morphed(
-    DracoCompressor *compressor
+    DracoCompressor *const compressor
 ) {
     draco::Encoder encoder;
 
@@ -110,20 +110,20 @@ bool compress_morphed(
 }
 
 uint64_t get_compressed_size(
-        DracoCompressor *compressor
+        DracoCompressor const *const compressor
 ) {
     return compressor->encoderBuffer.size();
 }
 
 void copy_to_bytes(
-        DracoCompressor *compressor,
-        uint8_t *o_data
+        DracoCompressor const *const compressor,
+        uint8_t *const o_data
 ) {
     memcpy(o_data, compressor->encoderBuffer.data(), compressor->encoderBuffer.size());
 }
 
 void destroy_compressor(
-        DracoCompressor *compressor
+        DracoCompressor *const compressor
 ) {
     delete compressor;
 }
@@ -131,8 +131,8 @@ void destroy_compressor(
 template<class T>
 void set_faces_impl(
         draco::Mesh &mesh,
-        int index_count,
-        T *indices
+        int const index_count,
+        T const *const indices
 ) {
     mesh.SetNumFaces((size_t) index_count / 3);
 
@@ -146,10 +146,10 @@ void set_faces_impl(
 }
 
 void set_faces(
-        DracoCompressor *compressor,
-        uint32_t index_count,
-        uint32_t index_byte_length,
-        uint8_t *indices
+        DracoCompressor *const compressor,
+        uint32_t const index_count,
+        uint32_t const index_byte_length,
+        uint8_t const *const indices
 ) {
 	switch (index_byte_length)
     {
@@ -177,13 +177,13 @@ void set_faces(
 }
 
 uint32_t add_attribute_to_mesh(
-        DracoCompressor *compressor,
-        draco::GeometryAttribute::Type semantics,
-        draco::DataType data_type,
-        uint32_t count,
-        uint8_t component_count,
-        uint8_t component_size,
-        uint8_t *data
+        DracoCompressor *const compressor,
+        draco::GeometryAttribute::Type const semantics,
+        draco::DataType const data_type,
+        uint32_t const count,
+        uint8_t const component_count,
+        uint8_t const component_size,
+        uint8_t const *const data
 ) {
     auto buffer = std::make_unique<draco::DataBuffer>();
 
@@ -216,8 +216,8 @@ uint32_t add_attribute_to_mesh(
 
 uint32_t add_positions_f32(
     DracoCompressor *const compressor,
-    uint32_t count,
-    uint8_t *const data
+    uint32_t const count,
+    uint8_t const *const data
 ) {
     return add_attribute_to_mesh(compressor, draco::GeometryAttribute::POSITION,
         draco::DT_FLOAT32, count, 3, sizeof(float), data);
@@ -225,8 +225,8 @@ uint32_t add_positions_f32(
 
 uint32_t add_normals_f32(
     DracoCompressor *const compressor,
-    uint32_t count,
-    uint8_t *const data
+    uint32_t const count,
+    uint8_t const *const data
 ) {
     return add_attribute_to_mesh(compressor, draco::GeometryAttribute::NORMAL,
         draco::DT_FLOAT32, count, 3, sizeof(float), data);
@@ -234,8 +234,8 @@ uint32_t add_normals_f32(
 
 uint32_t add_uvs_f32(
     DracoCompressor *const compressor,
-    uint32_t count,
-    uint8_t *const data
+    uint32_t const count,
+    uint8_t const *const data
 ) {
     return add_attribute_to_mesh(compressor, draco::GeometryAttribute::TEX_COORD,
         draco::DT_FLOAT32, count, 2, sizeof(float), data);
@@ -243,8 +243,8 @@ uint32_t add_uvs_f32(
 
 uint32_t add_joints_u16(
 	DracoCompressor *compressor,
-	uint32_t count,
-	uint8_t *data
+	uint32_t const count,
+	uint8_t const *const data
 ) {
 	return add_attribute_to_mesh(compressor, draco::GeometryAttribute::GENERIC,
 	    draco::DT_UINT16, count, 4, sizeof(uint16_t), data);
@@ -252,8 +252,8 @@ uint32_t add_joints_u16(
 
 uint32_t add_weights_f32(
 	DracoCompressor *compressor,
-	uint32_t count,
-    uint8_t *data
+	uint32_t const count,
+    uint8_t const *const data
 ) {
     return add_attribute_to_mesh(compressor, draco::GeometryAttribute::GENERIC,
         draco::DT_FLOAT32, count, 4, sizeof(float), data);
