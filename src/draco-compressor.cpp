@@ -84,10 +84,11 @@ bool compress(
 
     int speed = 10 - static_cast<int>(compressor->compressionLevel);
     encoder.SetSpeedOptions(speed, speed);
+
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantization.positions);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantization.normals);
-	encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantization.uvs);
-	encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, compressor->quantization.generic);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantization.uvs);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, compressor->quantization.generic);
 
     return encoder.EncodeMeshToBuffer(compressor->mesh, &compressor->encoderBuffer).ok();
 }
@@ -100,13 +101,10 @@ bool compress_morphed(
     int speed = 10 - static_cast<int>(compressor->compressionLevel);
     encoder.SetSpeedOptions(speed, speed);
 
-    // For some reason, `EncodeMeshToBuffer` crashes when not disabling prediction or when enabling quantization
-    // for attributes other position.
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantization.positions);
-    encoder.SetAttributePredictionScheme(draco::GeometryAttribute::POSITION, draco::PREDICTION_NONE);
-    encoder.SetAttributePredictionScheme(draco::GeometryAttribute::NORMAL, draco::PREDICTION_NONE);
-    encoder.SetAttributePredictionScheme(draco::GeometryAttribute::TEX_COORD, draco::PREDICTION_NONE);
-    encoder.SetAttributePredictionScheme(draco::GeometryAttribute::GENERIC, draco::PREDICTION_NONE);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantization.normals);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantization.uvs);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, compressor->quantization.generic);
 
     // Enforce triangle order preservation.
     encoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
@@ -227,6 +225,8 @@ uint32_t add_positions_f32(
     uint32_t const count,
     uint8_t const *const data
 ) {
+    compressor->mesh.set_num_points(count);
+
     return add_attribute_to_mesh(compressor, draco::GeometryAttribute::POSITION,
         draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
