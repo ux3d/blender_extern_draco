@@ -139,16 +139,17 @@ void set_faces_impl(
         int const index_count,
         T const *const indices
 ) {
-    mesh.SetNumFaces(static_cast<size_t>(index_count) / 3);
+    int face_count = index_count / 3;
+    mesh.SetNumFaces(static_cast<size_t>(face_count));
 
-    for (int i = 0; i < index_count; i += 3)
+    for (int i = 0; i < face_count; ++i)
     {
         draco::Mesh::Face face = {
-            draco::PointIndex(indices[i + 0]),
-            draco::PointIndex(indices[i + 1]),
-            draco::PointIndex(indices[i + 2])
+            draco::PointIndex(indices[3 * i + 0]),
+            draco::PointIndex(indices[3 * i + 1]),
+            draco::PointIndex(indices[3 * i + 2])
         };
-        mesh.SetFace(draco::FaceIndex(static_cast<uint32_t>(i) / 3), face);
+        mesh.SetFace(draco::FaceIndex(static_cast<uint32_t>(i)), face);
     }
 }
 
