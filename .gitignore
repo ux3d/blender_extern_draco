@@ -1,3 +1,6 @@
-.idea/
-cmake-build-debug/
-build/
+.DS_Store
+.idea
+cmake-build-debug
+build
+build-*
+
