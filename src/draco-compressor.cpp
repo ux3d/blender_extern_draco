@@ -141,10 +141,12 @@ void set_faces_impl(
 
     for (int i = 0; i < index_count; i += 3)
     {
-        const auto a = draco::PointIndex(indices[i]);
-        const auto b = draco::PointIndex(indices[i + 1]);
-        const auto c = draco::PointIndex(indices[i + 2]);
-        mesh.SetFace(draco::FaceIndex((uint32_t) i), {a, b, c});
+        draco::Mesh::Face face = {
+            draco::PointIndex(indices[i + 0]),
+            draco::PointIndex(indices[i + 1]),
+            draco::PointIndex(indices[i + 2])
+        };
+        mesh.SetFace(draco::FaceIndex((uint32_t) i / 3), face);
     }
 }
 
