@@ -82,7 +82,8 @@ bool compress(
 ) {
     draco::Encoder encoder;
 
-    encoder.SetSpeedOptions(10 - (int)compressor->compressionLevel, 10 - (int)compressor->compressionLevel);
+    int speed = 10 - static_cast<int>(compressor->compressionLevel);
+    encoder.SetSpeedOptions(speed, speed);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantization.positions);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantization.normals);
 	encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantization.uvs);
@@ -96,7 +97,8 @@ bool compress_morphed(
 ) {
     draco::Encoder encoder;
 
-    encoder.SetSpeedOptions(10 - (int)compressor->compressionLevel, 10 - (int)compressor->compressionLevel);
+    int speed = 10 - static_cast<int>(compressor->compressionLevel);
+    encoder.SetSpeedOptions(speed, speed);
 
     // For some reason, `EncodeMeshToBuffer` crashes when not disabling prediction or when enabling quantization
     // for attributes other position.
@@ -137,7 +139,7 @@ void set_faces_impl(
         int const index_count,
         T const *const indices
 ) {
-    mesh.SetNumFaces((size_t) index_count / 3);
+    mesh.SetNumFaces(static_cast<size_t>(index_count) / 3);
 
     for (int i = 0; i < index_count; i += 3)
     {
@@ -146,7 +148,7 @@ void set_faces_impl(
             draco::PointIndex(indices[i + 1]),
             draco::PointIndex(indices[i + 2])
         };
-        mesh.SetFace(draco::FaceIndex((uint32_t) i / 3), face);
+        mesh.SetFace(draco::FaceIndex(static_cast<uint32_t>(i) / 3), face);
     }
 }
 
@@ -160,17 +162,17 @@ void set_faces(
     {
         case 1:
         {
-            set_faces_impl(compressor->mesh, index_count, (uint8_t *) indices);
+            set_faces_impl(compressor->mesh, index_count, reinterpret_cast<uint8_t const *>(indices));
             break;
         }
         case 2:
         {
-            set_faces_impl(compressor->mesh, index_count, (uint16_t *) indices);
+            set_faces_impl(compressor->mesh, index_count, reinterpret_cast<uint16_t const *>(indices));
             break;
         }
         case 4:
         {
-            set_faces_impl(compressor->mesh, index_count, (uint32_t *) indices);
+            set_faces_impl(compressor->mesh, index_count, reinterpret_cast<uint32_t const *>(indices));
             break;
         }
         default:
@@ -204,7 +206,7 @@ uint32_t add_attribute_to_mesh(
 		0
 	);
 
-    auto const id = (uint32_t)compressor->mesh.AddAttribute(attribute, true, count);
+    auto const id = static_cast<uint32_t>(compressor->mesh.AddAttribute(attribute, true, count));
 
     for (uint32_t i = 0; i < count; i++)
     {
