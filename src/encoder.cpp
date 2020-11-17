@@ -3,7 +3,7 @@
  * @date   2019-11-29
  */
 
-#include "draco-compressor.h"
+#include "encoder.h"
 
 #include <memory>
 #include <vector>
@@ -15,15 +15,15 @@
 /**
  * Prefix used for logging messages.
  */
-const char *logTag = "DRACO-COMPRESSOR";
+static char const *logPrefix = "DracoEncoder";
 
-struct DracoCompressor {
+struct DracoEncoder {
     draco::Mesh mesh;
 
     // One data buffer per attribute.
     std::vector<std::unique_ptr<draco::DataBuffer>> buffers;
 
-    // The buffer the mesh is compressed into.
+    // The buffer the mesh is encoded into.
     draco::EncoderBuffer encoderBuffer;
 
     // Level of compression [0-10].
@@ -38,97 +38,97 @@ struct DracoCompressor {
     } quantization;
 };
 
-DracoCompressor *create_compressor() {
-    return new DracoCompressor;
+DracoEncoder *create_encoder() {
+    return new DracoEncoder;
 }
 
 void set_compression_level(
-        DracoCompressor *const compressor,
+        DracoEncoder *const encoder,
         uint32_t const compressionLevel
 ) {
-    compressor->compressionLevel = compressionLevel;
+    encoder->compressionLevel = compressionLevel;
 }
 
 void set_position_quantization(
-        DracoCompressor *const compressor,
+        DracoEncoder *const encoder,
         uint32_t const quantizationBitsPosition
 ) {
-    compressor->quantization.positions = quantizationBitsPosition;
+    encoder->quantization.positions = quantizationBitsPosition;
 }
 
 void set_normal_quantization(
-        DracoCompressor *const compressor,
+        DracoEncoder *const encoder,
         uint32_t const quantizationBitsNormal
 ) {
-    compressor->quantization.normals = quantizationBitsNormal;
+    encoder->quantization.normals = quantizationBitsNormal;
 }
 
 void set_uv_quantization(
-	DracoCompressor *const compressor,
+	DracoEncoder *const encoder,
 	uint32_t const quantizationBitsTexCoord
 ) {
-	compressor->quantization.uvs = quantizationBitsTexCoord;
+	encoder->quantization.uvs = quantizationBitsTexCoord;
 }
 
 void set_generic_quantization(
-	DracoCompressor *const compressor,
+	DracoEncoder *const encoder,
 	uint32_t const bits
 ) {
-	compressor->quantization.generic = bits;
+	encoder->quantization.generic = bits;
 }
 
-bool compress(
-    DracoCompressor *const compressor
+bool encode(
+    DracoEncoder *const encoder
 ) {
     draco::Encoder encoder;
 
-    int speed = 10 - static_cast<int>(compressor->compressionLevel);
+    int speed = 10 - static_cast<int>(encoder->compressionLevel);
     encoder.SetSpeedOptions(speed, speed);
 
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantization.positions);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantization.normals);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantization.uvs);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, compressor->quantization.generic);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
 
-    return encoder.EncodeMeshToBuffer(compressor->mesh, &compressor->encoderBuffer).ok();
+    return encoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
-bool compress_morphed(
-    DracoCompressor *const compressor
+bool encode_morphed(
+    DracoEncoder *const encoder
 ) {
     draco::Encoder encoder;
 
-    int speed = 10 - static_cast<int>(compressor->compressionLevel);
+    int speed = 10 - static_cast<int>(encoder->compressionLevel);
     encoder.SetSpeedOptions(speed, speed);
 
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, compressor->quantization.positions);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, compressor->quantization.normals);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, compressor->quantization.uvs);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, compressor->quantization.generic);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
+    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
 
     // Enforce triangle order preservation.
     encoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
 
-    return encoder.EncodeMeshToBuffer(compressor->mesh, &compressor->encoderBuffer).ok();
+    return encoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
-uint64_t get_compressed_size(
-        DracoCompressor const *const compressor
+uint64_t get_encoded_size(
+        DracoEncoder const *const encoder
 ) {
-    return compressor->encoderBuffer.size();
+    return encoder->encoderBuffer.size();
 }
 
 void copy_to_bytes(
-        DracoCompressor const *const compressor,
+        DracoEncoder const *const encoder,
         uint8_t *const o_data
 ) {
-    memcpy(o_data, compressor->encoderBuffer.data(), compressor->encoderBuffer.size());
+    memcpy(o_data, encoder->encoderBuffer.data(), encoder->encoderBuffer.size());
 }
 
-void destroy_compressor(
-        DracoCompressor *const compressor
+void destroy_encoder(
+        DracoEncoder *const encoder
 ) {
-    delete compressor;
+    delete encoder;
 }
 
 template<class T>
@@ -152,7 +152,7 @@ void set_faces_impl(
 }
 
 void set_faces(
-        DracoCompressor *const compressor,
+        DracoEncoder *const encoder,
         uint32_t const index_count,
         uint32_t const index_byte_length,
         uint8_t const *const indices
@@ -161,29 +161,29 @@ void set_faces(
     {
         case 1:
         {
-            set_faces_impl(compressor->mesh, index_count, reinterpret_cast<uint8_t const *>(indices));
+            set_faces_impl(encoder->mesh, index_count, reinterpret_cast<uint8_t const *>(indices));
             break;
         }
         case 2:
         {
-            set_faces_impl(compressor->mesh, index_count, reinterpret_cast<uint16_t const *>(indices));
+            set_faces_impl(encoder->mesh, index_count, reinterpret_cast<uint16_t const *>(indices));
             break;
         }
         case 4:
         {
-            set_faces_impl(compressor->mesh, index_count, reinterpret_cast<uint32_t const *>(indices));
+            set_faces_impl(encoder->mesh, index_count, reinterpret_cast<uint32_t const *>(indices));
             break;
         }
         default:
         {
-            printf("%s: Unsupported index size %d\n", logTag, index_byte_length);
+            printf("%s: Unsupported index size %d\n", logPrefix, index_byte_length);
             break;
         }
     }
 }
 
 uint32_t add_attribute_to_mesh(
-        DracoCompressor *const compressor,
+        DracoEncoder *const encoder,
         draco::GeometryAttribute::Type const semantics,
         draco::DataType const data_type,
         uint32_t const count,
@@ -205,64 +205,64 @@ uint32_t add_attribute_to_mesh(
 		0
 	);
 
-    auto const id = static_cast<uint32_t>(compressor->mesh.AddAttribute(attribute, true, count));
+    auto const id = static_cast<uint32_t>(encoder->mesh.AddAttribute(attribute, true, count));
 
     for (uint32_t i = 0; i < count; i++)
     {
-        compressor->mesh.attribute(id)->SetAttributeValue(
+        encoder->mesh.attribute(id)->SetAttributeValue(
             draco::AttributeValueIndex(i),
             data + i * component_count * component_size
         );
     }
 
-    compressor->buffers.emplace_back(std::move(buffer));
+    encoder->buffers.emplace_back(std::move(buffer));
 
     return id;
 }
 
 uint32_t add_positions_f32(
-    DracoCompressor *const compressor,
+    DracoEncoder *const encoder,
     uint32_t const count,
     uint8_t const *const data
 ) {
-    compressor->mesh.set_num_points(count);
+    encoder->mesh.set_num_points(count);
 
-    return add_attribute_to_mesh(compressor, draco::GeometryAttribute::POSITION,
+    return add_attribute_to_mesh(encoder, draco::GeometryAttribute::POSITION,
         draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
 
 uint32_t add_normals_f32(
-    DracoCompressor *const compressor,
+    DracoEncoder *const encoder,
     uint32_t const count,
     uint8_t const *const data
 ) {
-    return add_attribute_to_mesh(compressor, draco::GeometryAttribute::NORMAL,
+    return add_attribute_to_mesh(encoder, draco::GeometryAttribute::NORMAL,
         draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
 
 uint32_t add_uvs_f32(
-    DracoCompressor *const compressor,
+    DracoEncoder *const encoder,
     uint32_t const count,
     uint8_t const *const data
 ) {
-    return add_attribute_to_mesh(compressor, draco::GeometryAttribute::TEX_COORD,
+    return add_attribute_to_mesh(encoder, draco::GeometryAttribute::TEX_COORD,
         draco::DT_FLOAT32, count, 2, sizeof(float), data);
 }
 
 uint32_t add_joints_u16(
-	DracoCompressor *compressor,
+	DracoEncoder *encoder,
 	uint32_t const count,
 	uint8_t const *const data
 ) {
-	return add_attribute_to_mesh(compressor, draco::GeometryAttribute::GENERIC,
+	return add_attribute_to_mesh(encoder, draco::GeometryAttribute::GENERIC,
 	    draco::DT_UINT16, count, 4, sizeof(uint16_t), data);
 }
 
 uint32_t add_weights_f32(
-	DracoCompressor *compressor,
+	DracoEncoder *encoder,
 	uint32_t const count,
     uint8_t const *const data
 ) {
-    return add_attribute_to_mesh(compressor, draco::GeometryAttribute::GENERIC,
+    return add_attribute_to_mesh(encoder, draco::GeometryAttribute::GENERIC,
         draco::DT_FLOAT32, count, 4, sizeof(float), data);
 }

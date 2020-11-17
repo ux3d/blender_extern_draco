@@ -2,9 +2,9 @@
  * C++ library for the Draco compression feature inside the glTF-Blender-IO project.
  *
  * The python side uses the CTypes library to open the DLL, load function
- * pointers add pass the data to the compressor as raw bytes.
+ * pointers add pass the data to the encoder as raw bytes.
  *
- * The compressor intercepts the regular glTF exporter after data has been
+ * The encoder intercepts the regular glTF exporter after data has been
  * gathered and right before the data is converted to a JSON representation,
  * which is going to be written out.
  *
@@ -12,7 +12,7 @@
  * pointing to the newly created buffer containing the compressed data.
  *
  * @author Jim Eckerlein <eckerlein@ux3d.io>
- * @date   2019-11-29
+ * @date   2020-11-17
  */
 
 #include <cstdint>
@@ -24,66 +24,64 @@
 #endif
 
 /**
- * This tuple is opaquely exposed to Python through a pointer.
- * It encapsulates the complete current compressor state.
- *
- * A single instance is only intended to compress a single primitive.
+ * The opaque Draco encoder.
+ * A single instance is only intended to encode a single primitive.
  */
-struct DracoCompressor;
+struct DracoEncoder;
 
-DLL_EXPORT(DracoCompressor *)
-create_compressor ();
+DLL_EXPORT(DracoEncoder *)
+create_encoder ();
 
 DLL_EXPORT(void)
 set_compression_level (
-        DracoCompressor *compressor,
+        DracoEncoder *encoder,
         uint32_t compressionLevel
 );
 
 DLL_EXPORT(void)
 set_position_quantization (
-        DracoCompressor *compressor,
+        DracoEncoder *encoder,
         uint32_t quantizationBitsPosition
 );
 
 DLL_EXPORT(void)
 set_normal_quantization (
-        DracoCompressor *compressor,
+        DracoEncoder *encoder,
         uint32_t quantizationBitsNormal
 );
 
 DLL_EXPORT(void)
 set_uv_quantization (
-	DracoCompressor *compressor,
+	DracoEncoder *encoder,
 	uint32_t quantizationBitsTexCoord
 );
 
 DLL_EXPORT(void)
 set_generic_quantization (
-	DracoCompressor *compressor,
+	DracoEncoder *encoder,
 	uint32_t bits
 );
 
-/// Compresses a mesh.
-/// Use `compress_morphed` when compressing primitives which have morph targets.
+/// Encodes a mesh.
+/// Use `encode_morphed` when compressing primitives which have morph targets.
 DLL_EXPORT(bool)
-compress (
-    DracoCompressor *compressor
+encode (
+    DracoEncoder *encoder
 );
 
-/// Compresses the mesh.
-/// Use this instead of `compress`, because this procedure takes into account that mesh triangles must not be reordered.
+/// Encodes a mesh which is used together with morph targets.
+/// Use this instead of `encode`, because this procedure takes into account that mesh triangles must not be reordered.
 DLL_EXPORT(bool)
-compress_morphed (
-    DracoCompressor *compressor
+encode_morphed (
+    DracoEncoder *encoder
 );
 
 /**
- * Returns the size of the compressed data in bytes.
+ * Returns the size of the encoded data in bytes.
  */
 DLL_EXPORT(uint64_t)
-get_compressed_size (
-        DracoCompressor const *compressor
+get_encoded_size (
+        DracoEncoder const *encoder
 );
 
 /**
@@ -93,21 +91,21 @@ get_compressed_size (
  */
 DLL_EXPORT(void)
 copy_to_bytes (
-        DracoCompressor const *compressor,
+        DracoEncoder const *encoder,
         uint8_t *o_data
 );
 
 /**
- * Releases all memory allocated by the compressor.
+ * Releases all memory allocated by the encoder.
  */
 DLL_EXPORT(void)
-destroy_compressor (
-        DracoCompressor *compressor
+destroy_encoder (
+        DracoEncoder *encoder
 );
 
 DLL_EXPORT(void)
 set_faces (
-        DracoCompressor *compressor,
+        DracoEncoder *encoder,
         uint32_t index_count,
         uint32_t index_byte_length,
         uint8_t const *indices
@@ -117,7 +115,7 @@ set_faces (
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
 add_positions_f32 (
-    DracoCompressor *compressor,
+    DracoEncoder *encoder,
     uint32_t count,
     uint8_t const *data
 );
@@ -126,7 +124,7 @@ add_positions_f32 (
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
 add_normals_f32 (
-    DracoCompressor *compressor,
+    DracoEncoder *encoder,
     uint32_t count,
     uint8_t const *data
 );
@@ -135,7 +133,7 @@ add_normals_f32 (
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
 add_uvs_f32 (
-    DracoCompressor *compressor,
+    DracoEncoder *encoder,
     uint32_t count,
     uint8_t const *data
 );
@@ -144,7 +142,7 @@ add_uvs_f32 (
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
 add_joints_u16 (
-	DracoCompressor *compressor,
+	DracoEncoder *encoder,
 	uint32_t count,
 	uint8_t const *data
 );
@@ -153,7 +151,7 @@ add_joints_u16 (
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
 add_weights_f32 (
-	DracoCompressor *compressor,
+	DracoEncoder *encoder,
 	uint32_t count,
     uint8_t const *data
 );
