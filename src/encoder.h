@@ -13,8 +13,8 @@ encoderCreate ();
 
 DLL_EXPORT(void)
 encoderSetCompressionLevel (
-        DracoEncoder *encoder,
-        uint32_t compressionLevel
+    DracoEncoder *encoder,
+    uint32_t compressionLevel
 );
 
 DLL_EXPORT(void)
@@ -45,7 +45,7 @@ encoderEncodeMorphed (
  */
 DLL_EXPORT(uint64_t)
 encoderGetByteLength (
-        DracoEncoder const *encoder
+    DracoEncoder const *encoder
 );
 
 /**
@@ -55,8 +55,8 @@ encoderGetByteLength (
  */
 DLL_EXPORT(void)
 encoderCopy (
-        DracoEncoder const *encoder,
-        uint8_t *o_data
+    DracoEncoder const *encoder,
+    uint8_t *o_data
 );
 
 /**
@@ -64,15 +64,15 @@ encoderCopy (
  */
 DLL_EXPORT(void)
 encoderRelease (
-        DracoEncoder *encoder
+    DracoEncoder *encoder
 );
 
 DLL_EXPORT(void)
 encoderSetFaces (
-        DracoEncoder *encoder,
-        uint32_t index_count,
-        uint32_t index_byte_length,
-        uint8_t const *indices
+    DracoEncoder *encoder,
+    uint32_t index_count,
+    uint32_t index_byte_length,
+    uint8_t const *indices
 );
 
 /// Adds a single-precision float position attribute to the current mesh.
