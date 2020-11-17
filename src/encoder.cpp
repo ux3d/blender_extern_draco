@@ -80,36 +80,36 @@ void set_generic_quantization(
 bool encode(
     DracoEncoder *const encoder
 ) {
-    draco::Encoder encoder;
+    draco::Encoder dracoEncoder;
 
     int speed = 10 - static_cast<int>(encoder->compressionLevel);
-    encoder.SetSpeedOptions(speed, speed);
+    dracoEncoder.SetSpeedOptions(speed, speed);
 
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
 
-    return encoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
+    return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
 bool encode_morphed(
     DracoEncoder *const encoder
 ) {
-    draco::Encoder encoder;
+    draco::Encoder dracoEncoder;
 
     int speed = 10 - static_cast<int>(encoder->compressionLevel);
-    encoder.SetSpeedOptions(speed, speed);
+    dracoEncoder.SetSpeedOptions(speed, speed);
 
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
-    encoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
 
     // Enforce triangle order preservation.
-    encoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
+    dracoEncoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
 
-    return encoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
+    return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
 uint64_t get_encoded_size(
