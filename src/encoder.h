@@ -1,5 +1,5 @@
 /**
- * C++ library for the Draco compression feature inside the glTF-Blender-IO project.
+ * Library for the Draco encoding/decoding feature inside the glTF-Blender-IO project.
  *
  * The python side uses the CTypes library to open the DLL, load function
  * pointers add pass the data to the encoder as raw bytes.
@@ -30,49 +30,34 @@
 struct DracoEncoder;
 
 DLL_EXPORT(DracoEncoder *)
-create_encoder ();
+encoderCreate ();
 
 DLL_EXPORT(void)
-set_compression_level (
+encoderSetCompressionLevel (
         DracoEncoder *encoder,
         uint32_t compressionLevel
 );
 
 DLL_EXPORT(void)
-set_position_quantization (
+encoderSetQuantizationBits (
         DracoEncoder *encoder,
-        uint32_t quantizationBitsPosition
-);
-
-DLL_EXPORT(void)
-set_normal_quantization (
-        DracoEncoder *encoder,
-        uint32_t quantizationBitsNormal
-);
-
-DLL_EXPORT(void)
-set_uv_quantization (
-	DracoEncoder *encoder,
-	uint32_t quantizationBitsTexCoord
-);
-
-DLL_EXPORT(void)
-set_generic_quantization (
-	DracoEncoder *encoder,
-	uint32_t bits
+        uint32_t position,
+        uint32_t normal,
+        uint32_t texCoord,
+        uint32_t generic
 );
 
 /// Encodes a mesh.
 /// Use `encode_morphed` when compressing primitives which have morph targets.
 DLL_EXPORT(bool)
-encode (
+encoderEncode (
     DracoEncoder *encoder
 );
 
 /// Encodes a mesh which is used together with morph targets.
 /// Use this instead of `encode`, because this procedure takes into account that mesh triangles must not be reordered.
 DLL_EXPORT(bool)
-encode_morphed (
+encoderEncodeMorphed (
     DracoEncoder *encoder
 );
 
@@ -80,7 +65,7 @@ encode_morphed (
  * Returns the size of the encoded data in bytes.
  */
 DLL_EXPORT(uint64_t)
-get_encoded_size (
+encoderGetByteLength (
         DracoEncoder const *encoder
 );
 
@@ -90,7 +75,7 @@ get_encoded_size (
  * @param[o_data] A Python `bytes` object.
  */
 DLL_EXPORT(void)
-copy_to_bytes (
+encoderCopy (
         DracoEncoder const *encoder,
         uint8_t *o_data
 );
@@ -99,58 +84,58 @@ copy_to_bytes (
  * Releases all memory allocated by the encoder.
  */
 DLL_EXPORT(void)
-destroy_encoder (
+encoderRelease (
         DracoEncoder *encoder
 );
 
 DLL_EXPORT(void)
-set_faces (
+encoderSetFaces (
         DracoEncoder *encoder,
         uint32_t index_count,
         uint32_t index_byte_length,
         uint8_t const *indices
 );
 
-/// Adds a `float` position attribute to the current mesh.
+/// Adds a single-precision float position attribute to the current mesh.
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
-add_positions_f32 (
+encoderAddPositions (
     DracoEncoder *encoder,
     uint32_t count,
     uint8_t const *data
 );
 
-/// Adds a `float` normal attribute to the current mesh.
+/// Adds a single-precision float normal attribute to the current mesh.
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
-add_normals_f32 (
+encoderAddNormals (
     DracoEncoder *encoder,
     uint32_t count,
     uint8_t const *data
 );
 
-/// Adds a `float` texture coordinate attribute to the current mesh.
+/// Adds a single-precision float texture coordinate attribute to the current mesh.
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
-add_uvs_f32 (
+encoderAddUVs (
     DracoEncoder *encoder,
     uint32_t count,
     uint8_t const *data
 );
 
-/// Adds a `unsigned short` joint attribute to the current mesh.
+/// Adds an unsigned 16-bit integer joint attribute to the current mesh.
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
-add_joints_u16 (
+encoderAddJoints (
 	DracoEncoder *encoder,
 	uint32_t count,
 	uint8_t const *data
 );
 
-/// Adds a `float` weight attribute to the current mesh.
+/// Adds a single-precision float weight attribute to the current mesh.
 /// Returns the id Draco has assigned to this attribute.
 DLL_EXPORT(uint32_t)
-add_weights_f32 (
+encoderAddWeights (
 	DracoEncoder *encoder,
 	uint32_t count,
     uint8_t const *data
