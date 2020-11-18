@@ -79,7 +79,16 @@ bool encoderEncodeMorphed(Encoder *encoder)
     // Enforce triangle order preservation.
     dracoEncoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
 
-    return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
+    auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
+    if (encoderStatus.ok())
+    {
+        return true;
+    }
+    else
+    {
+        printf(LOG_PREFIX "Error during Draco encoding: %s\n", encoderStatus.error_msg());
+        return false;
+    }
 }
 
 uint64_t encoderGetByteLength(Encoder *encoder)
