@@ -156,13 +156,13 @@ void encoderSetFaces(
         }
         default:
         {
-            printf("%s: Unsupported index size %d\n", logPrefix, index_byte_length);
+            printf(LOG_PREFIX "Unsupported index size %d\n", index_byte_length);
             break;
         }
     }
 }
 
-static uint32_t addAttributeToMesh(
+uint32_t addAttributeToMesh(
         DracoEncoder *const encoder,
         draco::GeometryAttribute::Type const semantics,
         draco::DataType const data_type,

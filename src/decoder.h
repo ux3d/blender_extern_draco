@@ -8,32 +8,22 @@
  */
 struct Decoder;
 
-DLL_EXPORT(Decoder *)
-decoderCreate();
+API(Decoder *) decoderCreate();
 
-DLL_EXPORT(void)
-decoderRelease(Decoder const *decoder);
+API(void) decoderRelease(Decoder const *decoder);
 
-DLL_EXPORT(bool)
-decoderDecode(Decoder *decoder, void const *data, size_t byteLength);
+API(bool) decoderDecode(Decoder *decoder, void const *data, size_t byteLength);
 
-DLL_EXPORT(bool)
-decoderAttributeIsNormalized(Decoder const *decoder, uint32_t id);
+API(bool) decoderAttributeIsNormalized(Decoder const *decoder, uint32_t id);
 
-DLL_EXPORT(bool)
-decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char const *dataType);
+API(bool) decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char const *dataType);
 
-DLL_EXPORT(size_t)
-decoderGetBufferSize(Decoder *decoder, size_t id);
+API(size_t) decoderGetBufferSize(Decoder *decoder, size_t id);
 
-DLL_EXPORT(void *)
-decoderGetBufferData(Decoder *decoder, size_t id);
+API(void *) decoderGetBufferData(Decoder *decoder, size_t id);
 
-DLL_EXPORT(bool)
-decoderDecodeIndices(Decoder *decoder, size_t indexComponentType);
+API(bool) decoderDecodeIndices(Decoder *decoder, size_t indexComponentType);
 
-DLL_EXPORT(size_t)
-decoderGetIndexBufferSize(Decoder *decoder);
+API(size_t) decoderGetIndexBufferSize(Decoder *decoder);
 
-DLL_EXPORT(void *)
-decoderGetIndexBufferData(Decoder *decoder);
+API(void *) decoderGetIndexBufferData(Decoder *decoder);

@@ -14,8 +14,6 @@
 #include "draco/core/decoder_buffer.h"
 #include "draco/compression/decode.h"
 
-#define LOG_PREFIX "DracoDecoder | "
-
 enum ComponentType: size_t
 {
     Byte = 5120,
