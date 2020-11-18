@@ -28,9 +28,9 @@ API(bool) encoderEncodeMorphed(Encoder *encoder);
 
 API(uint64_t) encoderGetByteLength(Encoder *encoder);
 
-API(void) encoderCopy(Encoder *encoder, uint8_t *o_data);
+API(void) encoderCopy(Encoder *encoder, uint8_t *data);
 
-API(void) encoderSetFaces(Encoder *encoder, uint32_t index_count, uint32_t index_byte_length, uint8_t *indices);
+API(void) encoderSetFaces(Encoder *encoder, uint32_t indexCount, uint32_t indexStride, uint8_t *indices);
 
 API(uint32_t) encoderAddPositions(Encoder *encoder, uint32_t count, uint8_t *data); // float
 
