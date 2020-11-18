@@ -18,9 +18,16 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #if defined(_MSC_VER)
 #define DLL_EXPORT(retType) extern "C" __declspec(dllexport) retType __cdecl
 #else
 #define DLL_EXPORT(retType) extern "C" retType
 #endif
+
+
+/**
+ * Prefix used for logging messages.
+ */
+inline constexpr char const *logPrefix = "DracoEncoder";

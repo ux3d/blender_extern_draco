@@ -12,11 +12,6 @@
 #include "draco/core/encoder_buffer.h"
 #include "draco/compression/encode.h"
 
-/**
- * Prefix used for logging messages.
- */
-static char const *logPrefix = "DracoEncoder";
-
 struct DracoEncoder {
     draco::Mesh mesh;
 
