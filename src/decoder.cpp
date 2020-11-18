@@ -26,15 +26,9 @@ enum ComponentType: size_t
 
 struct Decoder {
     std::unique_ptr<draco::Mesh> mesh;
-
     std::vector<uint8_t> indexBuffer;
-    
-    // One data buffer per attribute.
     std::map<uint32_t, std::vector<uint8_t>> buffers;
-
-    // The buffer the mesh is decoded from.
     draco::DecoderBuffer decoderBuffer;
-    
     uint32_t vertexCount;
     uint32_t indexCount;
 };

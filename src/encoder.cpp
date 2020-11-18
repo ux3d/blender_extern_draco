@@ -1,6 +1,6 @@
 /**
  * @author Jim Eckerlein <eckerlein@ux3d.io>
- * @date   2019-11-29
+ * @date   2019-11-18
  */
 
 #include "encoder.h"
@@ -12,20 +12,12 @@
 #include "draco/core/encoder_buffer.h"
 #include "draco/compression/encode.h"
 
-struct DracoEncoder
+struct Encoder
 {
     draco::Mesh mesh;
-
-    // One data buffer per attribute.
     std::vector<std::unique_ptr<draco::DataBuffer>> buffers;
-
-    // The buffer the mesh is encoded into.
     draco::EncoderBuffer encoderBuffer;
-
-    // Level of compression [0-10].
-    // Higher values mean slower encoding.
     uint32_t compressionLevel = 7;
-
     struct
     {
         uint32_t positions = 14;
@@ -35,21 +27,21 @@ struct DracoEncoder
     } quantization;
 };
 
-DracoEncoder *encoderCreate()
+Encoder *encoderCreate()
 {
-    return new DracoEncoder;
+    return new Encoder;
 }
 
-void encoderRelease(DracoEncoder *encoder)
+void encoderRelease(Encoder *encoder)
 {
     delete encoder;
 }
 
-void encoderSetCompressionLevel(DracoEncoder *encoder, uint32_t compressionLevel) {
+void encoderSetCompressionLevel(Encoder *encoder, uint32_t compressionLevel) {
     encoder->compressionLevel = compressionLevel;
 }
 
-void encoderSetQuantizationBits(DracoEncoder *encoder, uint32_t position, uint32_t normal, uint32_t texCoord, uint32_t generic)
+void encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t normal, uint32_t texCoord, uint32_t generic)
 {
     encoder->quantization.positions = position;
     encoder->quantization.normals = normal;
@@ -57,7 +49,7 @@ void encoderSetQuantizationBits(DracoEncoder *encoder, uint32_t position, uint32
     encoder->quantization.generic = generic;
 }
 
-bool encoderEncode(DracoEncoder *encoder)
+bool encoderEncode(Encoder *encoder)
 {
     draco::Encoder dracoEncoder;
 
@@ -72,7 +64,7 @@ bool encoderEncode(DracoEncoder *encoder)
     return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
-bool encoderEncodeMorphed(DracoEncoder *encoder)
+bool encoderEncodeMorphed(Encoder *encoder)
 {
     draco::Encoder dracoEncoder;
 
@@ -90,12 +82,12 @@ bool encoderEncodeMorphed(DracoEncoder *encoder)
     return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
-uint64_t encoderGetByteLength(DracoEncoder *encoder)
+uint64_t encoderGetByteLength(Encoder *encoder)
 {
     return encoder->encoderBuffer.size();
 }
 
-void encoderCopy(DracoEncoder *encoder, uint8_t *o_data)
+void encoderCopy(Encoder *encoder, uint8_t *o_data)
 {
     memcpy(o_data, encoder->encoderBuffer.data(), encoder->encoderBuffer.size());
 }
@@ -117,7 +109,7 @@ void SetFacesTyped(draco::Mesh &mesh, int index_count, T *indices)
     }
 }
 
-void encoderSetFaces(DracoEncoder *encoder, uint32_t index_count, uint32_t index_byte_length, uint8_t *indices)
+void encoderSetFaces(Encoder *encoder, uint32_t index_count, uint32_t index_byte_length, uint8_t *indices)
 {
 	switch (index_byte_length)
     {
@@ -144,7 +136,7 @@ void encoderSetFaces(DracoEncoder *encoder, uint32_t index_count, uint32_t index
     }
 }
 
-uint32_t addAttributeToMesh(DracoEncoder *encoder, draco::GeometryAttribute::Type semantics, draco::DataType data_type, uint32_t count, uint8_t component_count, uint8_t component_size, uint8_t * data)
+uint32_t addAttributeToMesh(Encoder *encoder, draco::GeometryAttribute::Type semantics, draco::DataType data_type, uint32_t count, uint8_t component_count, uint8_t component_size, uint8_t * data)
 {
     auto buffer = std::make_unique<draco::DataBuffer>();
 
@@ -163,28 +155,28 @@ uint32_t addAttributeToMesh(DracoEncoder *encoder, draco::GeometryAttribute::Typ
     return id;
 }
 
-uint32_t encoderAddPositions(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+uint32_t encoderAddPositions(Encoder *encoder, uint32_t count, uint8_t *data)
 {
     encoder->mesh.set_num_points(count);
     return addAttributeToMesh(encoder, draco::GeometryAttribute::POSITION, draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
 
-uint32_t encoderAddNormals(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+uint32_t encoderAddNormals(Encoder *encoder, uint32_t count, uint8_t *data)
 {
     return addAttributeToMesh(encoder, draco::GeometryAttribute::NORMAL, draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
 
-uint32_t encoderAddUVs(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+uint32_t encoderAddUVs(Encoder *encoder, uint32_t count, uint8_t *data)
 {
     return addAttributeToMesh(encoder, draco::GeometryAttribute::TEX_COORD, draco::DT_FLOAT32, count, 2, sizeof(float), data);
 }
 
-uint32_t encoderAddJoints(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+uint32_t encoderAddJoints(Encoder *encoder, uint32_t count, uint8_t *data)
 {
 	return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC, draco::DT_UINT16, count, 4, sizeof(uint16_t), data);
 }
 
-uint32_t encoderAddWeights(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+uint32_t encoderAddWeights(Encoder *encoder, uint32_t count, uint8_t *data)
 {
     return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC, draco::DT_FLOAT32, count, 4, sizeof(float), data);
 }

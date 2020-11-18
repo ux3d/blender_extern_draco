@@ -1,11 +1,17 @@
+/**
+ * Library for the Draco encoding/decoding feature inside the glTF-Blender-IO project.
+ *
+ * The python script within glTF-Blender-IO uses the CTypes library to open the DLL,
+ * load function pointers add pass the raw data to the encoder.
+ *
+ * @author Jim Eckerlein <eckerlein@ux3d.io>
+ * @date   2020-11-18
+ */
+
 #pragma once
 
 #include "auxiliary.h"
 
-/**
- * The opaque Draco encoder.
- * A single instance is only intended to encode a single primitive.
- */
 struct Decoder;
 
 API(Decoder *) decoderCreate();
