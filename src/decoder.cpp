@@ -44,16 +44,16 @@ Decoder *decoderCreate()
     return new Decoder;
 }
 
-void decoderRelease(Decoder const *decoder)
+void decoderRelease(Decoder *decoder)
 {
     delete decoder;
 }
 
-bool decoderDecode(Decoder *decoder, void const *data, size_t byteLength)
+bool decoderDecode(Decoder *decoder, void *data, size_t byteLength)
 {
     draco::Decoder dracoDecoder;
     draco::DecoderBuffer dracoDecoderBuffer;
-    dracoDecoderBuffer.Init(reinterpret_cast<char const *>(data), byteLength);
+    dracoDecoderBuffer.Init(reinterpret_cast<char *>(data), byteLength);
     
     auto decoderStatus = dracoDecoder.DecodeMeshFromBuffer(&dracoDecoderBuffer);
     if (!decoderStatus.ok())
@@ -68,7 +68,7 @@ bool decoderDecode(Decoder *decoder, void const *data, size_t byteLength)
     return true;
 }
 
-size_t getNumberOfComponents(char const *dataType)
+size_t getNumberOfComponents(char *dataType)
 {
     if (!strcmp(dataType, "SCALAR"))
     {
@@ -121,18 +121,18 @@ size_t getComponentByteLength(size_t componentType)
     }
 }
 
-size_t getAttributeStride(size_t componentType, char const *dataType)
+size_t getAttributeStride(size_t componentType, char *dataType)
 {
     return getComponentByteLength(componentType) * getNumberOfComponents(dataType);
 }
 
-bool decoderAttributeIsNormalized(Decoder const *decoder, uint32_t id)
+bool decoderAttributeIsNormalized(Decoder *decoder, uint32_t id)
 {
     const draco::PointAttribute* attribute = decoder->mesh->GetAttributeByUniqueId(id);
     return attribute != nullptr && attribute->normalized();
 }
 
-bool decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char const *dataType)
+bool decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType)
 {
     const draco::PointAttribute* attribute = decoder->mesh->GetAttributeByUniqueId(id);
     
@@ -224,7 +224,7 @@ void decodeIndices(Decoder *decoder)
     
     for (uint32_t faceIndex = 0; faceIndex < decoder->mesh->num_faces(); ++faceIndex)
     {
-        draco::Mesh::Face const &face = decoder->mesh->face(draco::FaceIndex(faceIndex));
+        const draco::Mesh::Face &face = decoder->mesh->face(draco::FaceIndex(faceIndex));
         typedView[faceIndex * 3 + 0] = face[0].value();
         typedView[faceIndex * 3 + 1] = face[1].value();
         typedView[faceIndex * 3 + 2] = face[2].value();

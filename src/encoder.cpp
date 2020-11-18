@@ -12,7 +12,8 @@
 #include "draco/core/encoder_buffer.h"
 #include "draco/compression/encode.h"
 
-struct DracoEncoder {
+struct DracoEncoder
+{
     draco::Mesh mesh;
 
     // One data buffer per attribute.
@@ -25,7 +26,8 @@ struct DracoEncoder {
     // Higher values mean slower encoding.
     uint32_t compressionLevel = 7;
 
-    struct {
+    struct
+    {
         uint32_t positions = 14;
         uint32_t normals = 10;
         uint32_t uvs = 12;
@@ -33,33 +35,30 @@ struct DracoEncoder {
     } quantization;
 };
 
-DracoEncoder *encoderCreate() {
+DracoEncoder *encoderCreate()
+{
     return new DracoEncoder;
 }
 
-void encoderSetCompressionLevel(
-        DracoEncoder *const encoder,
-        uint32_t const compressionLevel
-) {
+void encoderRelease(DracoEncoder *encoder)
+{
+    delete encoder;
+}
+
+void encoderSetCompressionLevel(DracoEncoder *encoder, uint32_t compressionLevel) {
     encoder->compressionLevel = compressionLevel;
 }
 
-void encoderSetQuantizationBits (
-        DracoEncoder *encoder,
-        uint32_t position,
-        uint32_t normal,
-        uint32_t texCoord,
-        uint32_t generic
-) {
+void encoderSetQuantizationBits(DracoEncoder *encoder, uint32_t position, uint32_t normal, uint32_t texCoord, uint32_t generic)
+{
     encoder->quantization.positions = position;
     encoder->quantization.normals = normal;
     encoder->quantization.uvs = texCoord;
     encoder->quantization.generic = generic;
 }
 
-bool encoderEncode(
-    DracoEncoder *const encoder
-) {
+bool encoderEncode(DracoEncoder *encoder)
+{
     draco::Encoder dracoEncoder;
 
     int speed = 10 - static_cast<int>(encoder->compressionLevel);
@@ -73,9 +72,8 @@ bool encoderEncode(
     return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
-bool encoderEncodeMorphed(
-    DracoEncoder *const encoder
-) {
+bool encoderEncodeMorphed(DracoEncoder *encoder)
+{
     draco::Encoder dracoEncoder;
 
     int speed = 10 - static_cast<int>(encoder->compressionLevel);
@@ -92,34 +90,22 @@ bool encoderEncodeMorphed(
     return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
 }
 
-uint64_t encoderGetByteLength(
-        DracoEncoder const *const encoder
-) {
+uint64_t encoderGetByteLength(DracoEncoder *encoder)
+{
     return encoder->encoderBuffer.size();
 }
 
-void encoderCopy(
-        DracoEncoder const *const encoder,
-        uint8_t *const o_data
-) {
+void encoderCopy(DracoEncoder *encoder, uint8_t *o_data)
+{
     memcpy(o_data, encoder->encoderBuffer.data(), encoder->encoderBuffer.size());
 }
 
-void encoderRelease(
-        DracoEncoder *const encoder
-) {
-    delete encoder;
-}
-
 template<class T>
-void SetFacesTyped(
-        draco::Mesh &mesh,
-        int const index_count,
-        T const *const indices
-) {
+void SetFacesTyped(draco::Mesh &mesh, int index_count, T *indices)
+{
     int face_count = index_count / 3;
     mesh.SetNumFaces(static_cast<size_t>(face_count));
-
+    
     for (int i = 0; i < face_count; ++i)
     {
         draco::Mesh::Face face = {
@@ -131,27 +117,23 @@ void SetFacesTyped(
     }
 }
 
-void encoderSetFaces(
-        DracoEncoder *const encoder,
-        uint32_t const index_count,
-        uint32_t const index_byte_length,
-        uint8_t const *const indices
-) {
+void encoderSetFaces(DracoEncoder *encoder, uint32_t index_count, uint32_t index_byte_length, uint8_t *indices)
+{
 	switch (index_byte_length)
     {
         case 1:
         {
-            SetFacesTyped(encoder->mesh, index_count, reinterpret_cast<uint8_t const *>(indices));
+            SetFacesTyped(encoder->mesh, index_count, reinterpret_cast<uint8_t *>(indices));
             break;
         }
         case 2:
         {
-            SetFacesTyped(encoder->mesh, index_count, reinterpret_cast<uint16_t const *>(indices));
+            SetFacesTyped(encoder->mesh, index_count, reinterpret_cast<uint16_t *>(indices));
             break;
         }
         case 4:
         {
-            SetFacesTyped(encoder->mesh, index_count, reinterpret_cast<uint32_t const *>(indices));
+            SetFacesTyped(encoder->mesh, index_count, reinterpret_cast<uint32_t *>(indices));
             break;
         }
         default:
@@ -162,37 +144,18 @@ void encoderSetFaces(
     }
 }
 
-uint32_t addAttributeToMesh(
-        DracoEncoder *const encoder,
-        draco::GeometryAttribute::Type const semantics,
-        draco::DataType const data_type,
-        uint32_t const count,
-        uint8_t const component_count,
-        uint8_t const component_size,
-        uint8_t const *const data
-) {
+uint32_t addAttributeToMesh(DracoEncoder *encoder, draco::GeometryAttribute::Type semantics, draco::DataType data_type, uint32_t count, uint8_t component_count, uint8_t component_size, uint8_t * data)
+{
     auto buffer = std::make_unique<draco::DataBuffer>();
 
 	draco::GeometryAttribute attribute;
+	attribute.Init(semantics, &*buffer, component_count, data_type, false, component_size * component_count, 0);
 
-	attribute.Init(
-		semantics,
-		&*buffer,
-		component_count,
-        data_type,
-		false,
-        component_size * component_count,
-		0
-	);
-
-    auto const id = static_cast<uint32_t>(encoder->mesh.AddAttribute(attribute, true, count));
+    auto id = static_cast<uint32_t>(encoder->mesh.AddAttribute(attribute, true, count));
 
     for (uint32_t i = 0; i < count; i++)
     {
-        encoder->mesh.attribute(id)->SetAttributeValue(
-            draco::AttributeValueIndex(i),
-            data + i * component_count * component_size
-        );
+        encoder->mesh.attribute(id)->SetAttributeValue(draco::AttributeValueIndex(i), data + i * component_count * component_size);
     }
 
     encoder->buffers.emplace_back(std::move(buffer));
@@ -200,49 +163,28 @@ uint32_t addAttributeToMesh(
     return id;
 }
 
-uint32_t encoderAddPositions(
-    DracoEncoder *const encoder,
-    uint32_t const count,
-    uint8_t const *const data
-) {
+uint32_t encoderAddPositions(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+{
     encoder->mesh.set_num_points(count);
-
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::POSITION,
-        draco::DT_FLOAT32, count, 3, sizeof(float), data);
+    return addAttributeToMesh(encoder, draco::GeometryAttribute::POSITION, draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
 
-uint32_t encoderAddNormals(
-    DracoEncoder *const encoder,
-    uint32_t const count,
-    uint8_t const *const data
-) {
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::NORMAL,
-        draco::DT_FLOAT32, count, 3, sizeof(float), data);
+uint32_t encoderAddNormals(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+{
+    return addAttributeToMesh(encoder, draco::GeometryAttribute::NORMAL, draco::DT_FLOAT32, count, 3, sizeof(float), data);
 }
 
-uint32_t encoderAddUVs(
-    DracoEncoder *const encoder,
-    uint32_t const count,
-    uint8_t const *const data
-) {
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::TEX_COORD,
-        draco::DT_FLOAT32, count, 2, sizeof(float), data);
+uint32_t encoderAddUVs(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+{
+    return addAttributeToMesh(encoder, draco::GeometryAttribute::TEX_COORD, draco::DT_FLOAT32, count, 2, sizeof(float), data);
 }
 
-uint32_t encoderAddJoints(
-	DracoEncoder *encoder,
-	uint32_t const count,
-	uint8_t const *const data
-) {
-	return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC,
-	    draco::DT_UINT16, count, 4, sizeof(uint16_t), data);
+uint32_t encoderAddJoints(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+{
+	return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC, draco::DT_UINT16, count, 4, sizeof(uint16_t), data);
 }
 
-uint32_t encoderAddWeights(
-	DracoEncoder *encoder,
-	uint32_t const count,
-    uint8_t const *const data
-) {
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC,
-        draco::DT_FLOAT32, count, 4, sizeof(float), data);
+uint32_t encoderAddWeights(DracoEncoder *encoder, uint32_t count, uint8_t *data)
+{
+    return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC, draco::DT_FLOAT32, count, 4, sizeof(float), data);
 }

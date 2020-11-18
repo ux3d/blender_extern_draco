@@ -10,13 +10,13 @@ struct Decoder;
 
 API(Decoder *) decoderCreate();
 
-API(void) decoderRelease(Decoder const *decoder);
+API(void) decoderRelease(Decoder *decoder);
 
-API(bool) decoderDecode(Decoder *decoder, void const *data, size_t byteLength);
+API(bool) decoderDecode(Decoder *decoder, void *data, size_t byteLength);
 
-API(bool) decoderAttributeIsNormalized(Decoder const *decoder, uint32_t id);
+API(bool) decoderAttributeIsNormalized(Decoder *decoder, uint32_t id);
 
-API(bool) decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char const *dataType);
+API(bool) decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType);
 
 API(size_t) decoderGetBufferSize(Decoder *decoder, size_t id);
 
