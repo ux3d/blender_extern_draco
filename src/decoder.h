@@ -22,14 +22,14 @@ API(bool) decoderDecode(Decoder *decoder, void *data, size_t byteLength);
 
 API(bool) decoderAttributeIsNormalized(Decoder *decoder, uint32_t id);
 
-API(bool) decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType);
+API(bool) decoderReadAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType);
 
-API(size_t) decoderGetBufferSize(Decoder *decoder, size_t id);
+API(size_t) decoderGetAttributeByteLength(Decoder *decoder, size_t id);
 
-API(void *) decoderGetBufferData(Decoder *decoder, size_t id);
+API(void *) decoderGetAttributeData(Decoder *decoder, size_t id);
 
-API(bool) decoderDecodeIndices(Decoder *decoder, size_t indexComponentType);
+API(bool) decoderReadIndices(Decoder *decoder, size_t indexComponentType);
 
-API(size_t) decoderGetIndexBufferSize(Decoder *decoder);
+API(size_t) decoderGetIndicesByteLength(Decoder *decoder);
 
-API(void *) decoderGetIndexBufferData(Decoder *decoder);
+API(void *) decoderGetIndicesData(Decoder *decoder);

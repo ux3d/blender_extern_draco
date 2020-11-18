@@ -126,7 +126,7 @@ bool decoderAttributeIsNormalized(Decoder *decoder, uint32_t id)
     return attribute != nullptr && attribute->normalized();
 }
 
-bool decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType)
+bool decoderReadAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType)
 {
     const draco::PointAttribute* attribute = decoder->mesh->GetAttributeByUniqueId(id);
     
@@ -183,7 +183,7 @@ bool decoderDecodeAttribute(Decoder *decoder, uint32_t id, size_t componentType,
     return true;
 }
 
-size_t decoderGetBufferSize(Decoder *decoder, size_t id)
+size_t decoderGetAttributeByteLength(Decoder *decoder, size_t id)
 {
     auto iter = decoder->buffers.find(id);
     if (iter != decoder->buffers.end())
@@ -196,7 +196,7 @@ size_t decoderGetBufferSize(Decoder *decoder, size_t id)
     }
 }
 
-void *decoderGetBufferData(Decoder *decoder, size_t id)
+void *decoderGetAttributeData(Decoder *decoder, size_t id)
 {
     auto iter = decoder->buffers.find(id);
     if (iter != decoder->buffers.end())
@@ -227,7 +227,7 @@ void decodeIndices(Decoder *decoder)
     decoder->indexBuffer = decodedIndices;
 }
 
-bool decoderDecodeIndices(Decoder *decoder, size_t indexComponentType)
+bool decoderReadIndices(Decoder *decoder, size_t indexComponentType)
 {
     switch (indexComponentType)
     {
@@ -254,12 +254,12 @@ bool decoderDecodeIndices(Decoder *decoder, size_t indexComponentType)
     return true;
 }
 
-size_t decoderGetIndexBufferSize(Decoder *decoder)
+size_t decoderGetIndicesByteLength(Decoder *decoder)
 {
     return decoder->indexBuffer.size();
 }
 
-void *decoderGetIndexBufferData(Decoder *decoder)
+void *decoderGetIndicesData(Decoder *decoder)
 {
     return decoder->indexBuffer.data();
 }
