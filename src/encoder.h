@@ -28,6 +28,6 @@ API(uint64_t) encoderGetByteLength(Encoder *encoder);
 
 API(void) encoderCopy(Encoder *encoder, uint8_t *data);
 
-API(void) encoderSetFaces(Encoder *encoder, uint32_t indexCount, uint32_t indexStride, uint8_t *indices);
+API(void) encoderSetIndices(Encoder *encoder, size_t indexComponentType, uint32_t indexCount, void *indices);
 
 API(uint32_t) encoderSetAttribute(Encoder *encoder, char *attributeName, size_t componentType, char *dataType, void *data);

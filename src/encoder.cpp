@@ -20,6 +20,7 @@ struct Encoder
     std::vector<std::unique_ptr<draco::DataBuffer>> buffers;
     draco::EncoderBuffer encoderBuffer;
     uint32_t compressionLevel = 7;
+    size_t rawSize = 0;
     struct
     {
         uint32_t positions = 14;
@@ -75,7 +76,9 @@ bool encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder)
     auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
     if (encoderStatus.ok())
     {
-        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices\n", encoder->mesh.num_points(), encoder->mesh.num_faces() * 3);
+        size_t encodedSize = encoder->encoderBuffer.size();
+        float compressionRatio = static_cast<float>(encoder->rawSize) / static_cast<float>(encodedSize);
+        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices, raw size: %zu, encoded size: %zu, compression ratio: %.2f\n", encoder->mesh.num_points(), encoder->mesh.num_faces() * 3, encoder->rawSize, encodedSize, compressionRatio);
         return true;
     }
     else
@@ -96,10 +99,10 @@ void encoderCopy(Encoder *encoder, uint8_t *data)
 }
 
 template<class T>
-void setFaces(draco::Mesh &mesh, int indexCount, T *indices)
+void encodeIndices(Encoder *encoder, uint32_t indexCount, T *indices)
 {
     int face_count = indexCount / 3;
-    mesh.SetNumFaces(static_cast<size_t>(face_count));
+    encoder->mesh.SetNumFaces(static_cast<size_t>(face_count));
     
     for (int i = 0; i < face_count; ++i)
     {
@@ -108,54 +111,33 @@ void setFaces(draco::Mesh &mesh, int indexCount, T *indices)
             draco::PointIndex(indices[3 * i + 1]),
             draco::PointIndex(indices[3 * i + 2])
         };
-        mesh.SetFace(draco::FaceIndex(static_cast<uint32_t>(i)), face);
+        encoder->mesh.SetFace(draco::FaceIndex(static_cast<uint32_t>(i)), face);
     }
 }
 
-void encoderSetFaces(Encoder *encoder, uint32_t indexCount, uint32_t indexStride, uint8_t *indices)
+void encoderSetIndices(Encoder *encoder, size_t indexComponentType, uint32_t indexCount, void *indices)
 {
-	switch (indexStride)
+    switch (indexComponentType)
     {
-        case 1:
-        {
-            setFaces(encoder->mesh, indexCount, reinterpret_cast<uint8_t *>(indices));
+        case ComponentType::Byte:
+            encodeIndices(encoder, indexCount, reinterpret_cast<int8_t *>(indices));
             break;
-        }
-        case 2:
-        {
-            setFaces(encoder->mesh, indexCount, reinterpret_cast<uint16_t *>(indices));
+        case ComponentType::UnsignedByte:
+            encodeIndices(encoder, indexCount, reinterpret_cast<uint8_t *>(indices));
             break;
-        }
-        case 4:
-        {
-            setFaces(encoder->mesh, indexCount, reinterpret_cast<uint32_t *>(indices));
+        case ComponentType::Short:
+            encodeIndices(encoder, indexCount, reinterpret_cast<int16_t *>(indices));
             break;
-        }
+        case ComponentType::UnsignedShort:
+            encodeIndices(encoder, indexCount, reinterpret_cast<uint16_t *>(indices));
+            break;
+        case ComponentType::UnsignedInt:
+            encodeIndices(encoder, indexCount, reinterpret_cast<uint32_t *>(indices));
+            break;
         default:
-        {
-            printf(LOG_PREFIX "Unsupported index stride %d\n", indexStride);
-            break;
-        }
+            printf(LOG_PREFIX "Index component type %zu not supported\n", indexComponentType);
+            return false;
     }
-}
-
-uint32_t addAttributeToMesh(Encoder *encoder, draco::GeometryAttribute::Type semantics, draco::DataType dataType, uint32_t count, uint8_t componentCount, uint8_t componentSize, uint8_t *data)
-{
-    auto buffer = std::make_unique<draco::DataBuffer>();
-
-	draco::GeometryAttribute attribute;
-	attribute.Init(semantics, &*buffer, componentCount, dataType, false, componentSize * componentCount, 0);
-
-    auto id = static_cast<uint32_t>(encoder->mesh.AddAttribute(attribute, true, count));
-
-    for (uint32_t i = 0; i < count; i++)
-    {
-        encoder->mesh.attribute(id)->SetAttributeValue(draco::AttributeValueIndex(i), data + i * componentCount * componentSize);
-    }
-
-    encoder->buffers.emplace_back(std::move(buffer));
-
-    return id;
 }
 
 draco::GeometryAttribute::Type getAttributeSemantics(char *attribute)
@@ -234,5 +216,6 @@ API(uint32_t) encoderSetAttribute(Encoder *encoder, char *attributeName, size_t 
     }
 
     encoder->buffers.emplace_back(std::move(buffer));
+    encoder->rawSize += count * stride;
     return id;
 }
