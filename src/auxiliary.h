@@ -18,5 +18,3 @@
 #else
 #define API(returnType) extern "C" returnType
 #endif
-
-#define LOG_PREFIX "DracoDecoder | "

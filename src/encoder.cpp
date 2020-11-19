@@ -12,6 +12,8 @@
 #include "draco/core/encoder_buffer.h"
 #include "draco/compression/encode.h"
 
+#define LOG_PREFIX "DracoEncoder | "
+
 struct Encoder
 {
     draco::Mesh mesh;
@@ -60,8 +62,18 @@ bool encoderEncode(Encoder *encoder)
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
-
-    return dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer).ok();
+    
+    auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
+    if (encoderStatus.ok())
+    {
+        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices\n", encoder->mesh.num_points(), encoder->mesh.num_faces() * 3);
+        return true;
+    }
+    else
+    {
+        printf(LOG_PREFIX "Error during Draco encoding: %s\n", encoderStatus.error_msg());
+        return false;
+    }
 }
 
 bool encoderEncodeMorphed(Encoder *encoder)
@@ -82,6 +94,7 @@ bool encoderEncodeMorphed(Encoder *encoder)
     auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
     if (encoderStatus.ok())
     {
+        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices\n", encoder->mesh.num_points(), encoder->mesh.num_faces() * 3);
         return true;
     }
     else

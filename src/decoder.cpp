@@ -14,6 +14,8 @@
 #include "draco/core/decoder_buffer.h"
 #include "draco/compression/decode.h"
 
+#define LOG_PREFIX "DracoDecoder | "
+
 enum ComponentType: size_t
 {
     Byte = 5120,
@@ -59,6 +61,9 @@ bool decoderDecode(Decoder *decoder, void *data, size_t byteLength)
     decoder->mesh = std::move(decoderStatus).value();
     decoder->vertexCount = decoder->mesh->num_points();
     decoder->indexCount = decoder->mesh->num_faces() * 3;
+    
+    printf(LOG_PREFIX "Decoded %" PRIu32 " vertices, %" PRIu32 " indices\n", decoder->vertexCount, decoder->indexCount);
+    
     return true;
 }
 
