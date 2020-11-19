@@ -20,7 +20,7 @@ API(void) encoderRelease(Encoder *encoder);
 
 API(void) encoderSetCompressionLevel(Encoder *encoder, uint32_t compressionLevel);
 
-API(void) encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t normal, uint32_t texCoord, uint32_t generic);
+API(void) encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t normal, uint32_t uv, uint32_t color, uint32_t generic);
 
 API(bool) encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder);
 

@@ -23,9 +23,10 @@ struct Encoder
     size_t rawSize = 0;
     struct
     {
-        uint32_t positions = 14;
-        uint32_t normals = 10;
-        uint32_t uvs = 12;
+        uint32_t position = 14;
+        uint32_t normal = 10;
+        uint32_t uv = 12;
+        uint32_t color = 10;
         uint32_t generic = 12;
     } quantization;
 };
@@ -46,11 +47,12 @@ void encoderSetCompressionLevel(Encoder *encoder, uint32_t compressionLevel) {
     encoder->compressionLevel = compressionLevel;
 }
 
-void encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t normal, uint32_t texCoord, uint32_t generic)
+void encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t normal, uint32_t uv, uint32_t color, uint32_t generic)
 {
-    encoder->quantization.positions = position;
-    encoder->quantization.normals = normal;
-    encoder->quantization.uvs = texCoord;
+    encoder->quantization.position = position;
+    encoder->quantization.normal = normal;
+    encoder->quantization.uv = uv;
+    encoder->quantization.color = color;
     encoder->quantization.generic = generic;
 }
 
@@ -63,9 +65,10 @@ bool encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder)
     int speed = 10 - static_cast<int>(encoder->compressionLevel);
     dracoEncoder.SetSpeedOptions(speed, speed);
 
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.position);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normal);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uv);
+    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, encoder->quantization.color);
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
     
     if (preserveTriangleOrder)
