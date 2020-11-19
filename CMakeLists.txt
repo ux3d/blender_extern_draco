@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/2.80/python/lib/python3.7)
 
+option(BUILD_FOR_GLTF "" ON)
 add_subdirectory(draco EXCLUDE_FROM_ALL)
 
 add_library(extern_draco SHARED src/encoder.cpp src/encoder.h src/decoder.cpp src/decoder.h src/auxiliary.h)
