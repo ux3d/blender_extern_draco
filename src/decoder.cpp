@@ -201,16 +201,12 @@ size_t decoderGetAttributeByteLength(Decoder *decoder, size_t id)
     }
 }
 
-void *decoderGetAttributeData(Decoder *decoder, size_t id)
+void decoderCopyAttribute(Decoder *decoder, size_t id, void *output)
 {
     auto iter = decoder->buffers.find(id);
     if (iter != decoder->buffers.end())
     {
-        return iter->second.data();
-    }
-    else
-    {
-        return nullptr;
+        memcpy(output, iter->second.data(), iter->second.size());
     }
 }
 
@@ -264,7 +260,7 @@ size_t decoderGetIndicesByteLength(Decoder *decoder)
     return decoder->indexBuffer.size();
 }
 
-void *decoderGetIndicesData(Decoder *decoder)
+void decoderCopyIndices(Decoder *decoder, void *output)
 {
-    return decoder->indexBuffer.data();
+    memcpy(output, decoder->indexBuffer.data(), decoder->indexBuffer.size());
 }

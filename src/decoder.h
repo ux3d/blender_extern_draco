@@ -26,10 +26,10 @@ API(bool) decoderReadAttribute(Decoder *decoder, uint32_t id, size_t componentTy
 
 API(size_t) decoderGetAttributeByteLength(Decoder *decoder, size_t id);
 
-API(void *) decoderGetAttributeData(Decoder *decoder, size_t id);
+API(void) decoderCopyAttribute(Decoder *decoder, size_t id, void *output);
 
 API(bool) decoderReadIndices(Decoder *decoder, size_t indexComponentType);
 
 API(size_t) decoderGetIndicesByteLength(Decoder *decoder);
 
-API(void *) decoderGetIndicesData(Decoder *decoder);
+API(void) decoderCopyIndices(Decoder *decoder, void *output);
