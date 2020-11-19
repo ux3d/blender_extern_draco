@@ -22,9 +22,7 @@ API(void) encoderSetCompressionLevel(Encoder *encoder, uint32_t compressionLevel
 
 API(void) encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t normal, uint32_t texCoord, uint32_t generic);
 
-API(bool) encoderEncode(Encoder *encoder);
-
-API(bool) encoderEncodeMorphed(Encoder *encoder);
+API(bool) encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder);
 
 API(uint64_t) encoderGetByteLength(Encoder *encoder);
 

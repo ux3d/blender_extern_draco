@@ -51,8 +51,10 @@ void encoderSetQuantizationBits(Encoder *encoder, uint32_t position, uint32_t no
     encoder->quantization.generic = generic;
 }
 
-bool encoderEncode(Encoder *encoder)
+bool encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder)
 {
+    printf(LOG_PREFIX "Preserve triangle order: %s\n", preserveTriangleOrder ? "yes" : "no");
+    
     draco::Encoder dracoEncoder;
 
     int speed = 10 - static_cast<int>(encoder->compressionLevel);
@@ -63,34 +65,11 @@ bool encoderEncode(Encoder *encoder)
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
     
-    auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
-    if (encoderStatus.ok())
+    if (preserveTriangleOrder)
     {
-        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices\n", encoder->mesh.num_points(), encoder->mesh.num_faces() * 3);
-        return true;
+        dracoEncoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
     }
-    else
-    {
-        printf(LOG_PREFIX "Error during Draco encoding: %s\n", encoderStatus.error_msg());
-        return false;
-    }
-}
-
-bool encoderEncodeMorphed(Encoder *encoder)
-{
-    draco::Encoder dracoEncoder;
-
-    int speed = 10 - static_cast<int>(encoder->compressionLevel);
-    dracoEncoder.SetSpeedOptions(speed, speed);
-
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, encoder->quantization.positions);
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, encoder->quantization.normals);
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uvs);
-    dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
-
-    // Enforce triangle order preservation.
-    dracoEncoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
-
+    
     auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
     if (encoderStatus.ok())
     {
