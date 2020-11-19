@@ -14,7 +14,7 @@
 
 struct Encoder;
 
-API(Encoder *) encoderCreate ();
+API(Encoder *) encoderCreate(uint32_t vertexCount);
 
 API(void) encoderRelease(Encoder *encoder);
 
@@ -30,12 +30,4 @@ API(void) encoderCopy(Encoder *encoder, uint8_t *data);
 
 API(void) encoderSetFaces(Encoder *encoder, uint32_t indexCount, uint32_t indexStride, uint8_t *indices);
 
-API(uint32_t) encoderAddPositions(Encoder *encoder, uint32_t count, uint8_t *data); // float
-
-API(uint32_t) encoderAddNormals (Encoder *encoder, uint32_t count, uint8_t *data); // float
-
-API(uint32_t) encoderAddUVs(Encoder *encoder, uint32_t count, uint8_t *data); // float
-
-API(uint32_t) encoderAddJoints(Encoder *encoder, uint32_t count, uint8_t *data); // uint16
-
-API(uint32_t) encoderAddWeights(Encoder *encoder, uint32_t count, uint8_t *data); // float
+API(uint32_t) encoderSetAttribute(Encoder *encoder, char *attributeName, size_t componentType, char *dataType, void *data);

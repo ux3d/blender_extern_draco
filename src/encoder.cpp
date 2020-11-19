@@ -29,9 +29,11 @@ struct Encoder
     } quantization;
 };
 
-Encoder *encoderCreate()
+Encoder *encoderCreate(uint32_t vertexCount)
 {
-    return new Encoder;
+    Encoder *encoder = new Encoder;
+    encoder->mesh.set_num_points(vertexCount);
+    return encoder;
 }
 
 void encoderRelease(Encoder *encoder)
@@ -156,28 +158,81 @@ uint32_t addAttributeToMesh(Encoder *encoder, draco::GeometryAttribute::Type sem
     return id;
 }
 
-uint32_t encoderAddPositions(Encoder *encoder, uint32_t count, uint8_t *data)
+draco::GeometryAttribute::Type getAttributeSemantics(char *attribute)
 {
-    encoder->mesh.set_num_points(count);
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::POSITION, draco::DT_FLOAT32, count, 3, sizeof(float), data);
+    if (!strcmp(attribute, "POSITION"))
+    {
+        return draco::GeometryAttribute::POSITION;
+    }
+    if (!strcmp(attribute, "NORMAL"))
+    {
+        return draco::GeometryAttribute::NORMAL;
+    }
+    if (!strncmp(attribute, "TEXCOORD", strlen("TEXCOORD")))
+    {
+        return draco::GeometryAttribute::TEX_COORD;
+    }
+    if (!strncmp(attribute, "COLOR", strlen("COLOR")))
+    {
+        return draco::GeometryAttribute::COLOR;
+    }
+    
+    return draco::GeometryAttribute::GENERIC;
 }
 
-uint32_t encoderAddNormals(Encoder *encoder, uint32_t count, uint8_t *data)
+draco::DataType getDataType(size_t componentType)
 {
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::NORMAL, draco::DT_FLOAT32, count, 3, sizeof(float), data);
+    switch (componentType)
+    {
+        case ComponentType::Byte:
+            return draco::DataType::DT_INT8;
+            
+        case ComponentType::UnsignedByte:
+            return draco::DataType::DT_UINT8;
+            
+        case ComponentType::Short:
+            return draco::DataType::DT_INT16;
+            
+        case ComponentType::UnsignedShort:
+            return draco::DataType::DT_UINT16;
+            
+        case ComponentType::UnsignedInt:
+            return draco::DataType::DT_UINT32;
+            
+        case ComponentType::Float:
+            return draco::DataType::DT_FLOAT32;
+            
+        default:
+            return draco::DataType::DT_INVALID;
+    }
 }
 
-uint32_t encoderAddUVs(Encoder *encoder, uint32_t count, uint8_t *data)
+API(uint32_t) encoderSetAttribute(Encoder *encoder, char *attributeName, size_t componentType, char *dataType, void *data)
 {
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::TEX_COORD, draco::DT_FLOAT32, count, 2, sizeof(float), data);
-}
+    auto buffer = std::make_unique<draco::DataBuffer>();
+    uint32_t count = encoder->mesh.num_points();
+    size_t componentCount = getNumberOfComponents(dataType);
+    size_t stride = getAttributeStride(componentType, dataType);
+    draco::DataType dracoDataType = getDataType(componentType);
+    
+    if (dracoDataType == draco::DataType::DT_INVALID)
+    {
+        printf(LOG_PREFIX "Unsupported component type %zu.\n", componentType);
+        return -1;
+    }
+    
+    draco::GeometryAttribute::Type semantics = getAttributeSemantics(attributeName);
+    draco::GeometryAttribute attribute;
+    attribute.Init(semantics, &*buffer, componentCount, getDataType(componentType), false, stride, 0);
 
-uint32_t encoderAddJoints(Encoder *encoder, uint32_t count, uint8_t *data)
-{
-	return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC, draco::DT_UINT16, count, 4, sizeof(uint16_t), data);
-}
+    auto id = static_cast<uint32_t>(encoder->mesh.AddAttribute(attribute, true, count));
+    auto dataBytes = reinterpret_cast<uint8_t *>(data);
 
-uint32_t encoderAddWeights(Encoder *encoder, uint32_t count, uint8_t *data)
-{
-    return addAttributeToMesh(encoder, draco::GeometryAttribute::GENERIC, draco::DT_FLOAT32, count, 4, sizeof(float), data);
+    for (uint32_t i = 0; i < count; i++)
+    {
+        encoder->mesh.attribute(id)->SetAttributeValue(draco::AttributeValueIndex(i), dataBytes + i * stride);
+    }
+
+    encoder->buffers.emplace_back(std::move(buffer));
+    return id;
 }
