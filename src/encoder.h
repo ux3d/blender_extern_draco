@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "auxiliary.h"
+#include "common.h"
 
 struct Encoder;
 

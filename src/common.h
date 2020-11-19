@@ -18,3 +18,19 @@
 #else
 #define API(returnType) extern "C" returnType
 #endif
+
+enum ComponentType: size_t
+{
+    Byte = 5120,
+    UnsignedByte = 5121,
+    Short = 5122,
+    UnsignedShort = 5123,
+    UnsignedInt = 5125,
+    Float = 5126,
+};
+
+size_t getNumberOfComponents(char *dataType);
+
+size_t getComponentByteLength(size_t componentType);
+
+size_t getAttributeStride(size_t componentType, char *dataType);
