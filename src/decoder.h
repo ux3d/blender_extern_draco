@@ -20,6 +20,10 @@ API(void) decoderRelease(Decoder *decoder);
 
 API(bool) decoderDecode(Decoder *decoder, void *data, size_t byteLength);
 
+API(uint32_t) decoderGetVertexCount(Decoder *decoder);
+
+API(uint32_t) decoderGetIndexCount(Decoder *decoder);
+
 API(bool) decoderAttributeIsNormalized(Decoder *decoder, uint32_t id);
 
 API(bool) decoderReadAttribute(Decoder *decoder, uint32_t id, size_t componentType, char *dataType);

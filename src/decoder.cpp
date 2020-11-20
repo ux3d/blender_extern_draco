@@ -57,6 +57,16 @@ bool decoderDecode(Decoder *decoder, void *data, size_t byteLength)
     return true;
 }
 
+uint32_t decoderGetVertexCount(Decoder *decoder)
+{
+    return decoder->vertexCount;
+}
+
+uint32_t decoderGetIndexCount(Decoder *decoder)
+{
+    return decoder->indexCount;
+}
+
 bool decoderAttributeIsNormalized(Decoder *decoder, uint32_t id)
 {
     const draco::PointAttribute* attribute = decoder->mesh->GetAttributeByUniqueId(id);
