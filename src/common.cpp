@@ -32,6 +32,8 @@ size_t getNumberOfComponents(char *dataType)
     {
         return 16;
     }
+
+    return 0;
 }
 
 size_t getComponentByteLength(size_t componentType)

@@ -139,7 +139,6 @@ void encoderSetIndices(Encoder *encoder, size_t indexComponentType, uint32_t ind
             break;
         default:
             printf(LOG_PREFIX "Index component type %zu not supported\n", indexComponentType);
-            return false;
     }
 }
 
