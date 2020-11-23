@@ -106,6 +106,7 @@ void encodeIndices(Encoder *encoder, uint32_t indexCount, T *indices)
 {
     int face_count = indexCount / 3;
     encoder->mesh.SetNumFaces(static_cast<size_t>(face_count));
+    encoder->rawSize += indexCount * sizeof(T);
     
     for (int i = 0; i < face_count; ++i)
     {
