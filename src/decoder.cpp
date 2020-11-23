@@ -121,7 +121,7 @@ bool decoderReadAttribute(Decoder *decoder, uint32_t id, size_t componentType, c
 
         if (!converted)
         {
-            printf(LOG_PREFIX "Failed to convert Draco attribute type to glTF accessor type for attribute with id=%" PRIu32, id);
+            printf(LOG_PREFIX "Failed to convert Draco attribute type to glTF accessor type for attribute with id=%" PRIu32 "\n", id);
             return false;
         }
     }
