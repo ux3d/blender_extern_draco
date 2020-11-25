@@ -31,6 +31,8 @@
 struct Encoder
 {
     draco::Mesh mesh;
+    uint32_t encodedVertices;
+    uint32_t encodedIndices;
     std::vector<std::unique_ptr<draco::DataBuffer>> buffers;
     draco::EncoderBuffer encoderBuffer;
     uint32_t compressionLevel = 7;
@@ -84,6 +86,7 @@ bool encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder)
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, encoder->quantization.uv);
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, encoder->quantization.color);
     dracoEncoder.SetAttributeQuantization(draco::GeometryAttribute::GENERIC, encoder->quantization.generic);
+    dracoEncoder.SetTrackEncodedProperties(true);
     
     if (preserveTriangleOrder)
     {
@@ -93,9 +96,11 @@ bool encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder)
     auto encoderStatus = dracoEncoder.EncodeMeshToBuffer(encoder->mesh, &encoder->encoderBuffer);
     if (encoderStatus.ok())
     {
+        encoder->encodedVertices = static_cast<uint32_t>(dracoEncoder.num_encoded_points());
+        encoder->encodedIndices = static_cast<uint32_t>(dracoEncoder.num_encoded_faces() * 3);
         size_t encodedSize = encoder->encoderBuffer.size();
         float compressionRatio = static_cast<float>(encoder->rawSize) / static_cast<float>(encodedSize);
-        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices, raw size: %zu, encoded size: %zu, compression ratio: %.2f\n", encoder->mesh.num_points(), encoder->mesh.num_faces() * 3, encoder->rawSize, encodedSize, compressionRatio);
+        printf(LOG_PREFIX "Encoded %" PRIu32 " vertices, %" PRIu32 " indices, raw size: %zu, encoded size: %zu, compression ratio: %.2f\n", encoder->encodedVertices, encoder->encodedIndices, encoder->rawSize, encodedSize, compressionRatio);
         return true;
     }
     else
@@ -103,6 +108,16 @@ bool encoderEncode(Encoder *encoder, uint8_t preserveTriangleOrder)
         printf(LOG_PREFIX "Error during Draco encoding: %s\n", encoderStatus.error_msg());
         return false;
     }
+}
+
+uint32_t encoderGetEncodedVertexCount(Encoder *encoder)
+{
+    return encoder->encodedVertices;
+}
+
+uint32_t encoderGetEncodedIndexCount(Encoder *encoder)
+{
+    return encoder->encodedIndices;
 }
 
 uint64_t encoderGetByteLength(Encoder *encoder)
