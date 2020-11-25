@@ -3,8 +3,6 @@ project(Blender_ExternDraco)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/2.80/python/lib/python3.7)
-
 option(BUILD_FOR_GLTF "" ON)
 add_subdirectory(draco EXCLUDE_FROM_ALL)
 
