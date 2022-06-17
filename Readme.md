@@ -2,17 +2,18 @@
 
 [Draco](https://github.com/google/draco) encoding and decoding for [glTF-Blender-IO](https://github.com/KhronosGroup/glTF-Blender-IO).
 
-## Release build
+The Blender repository has copies of the files in `src` and the *required* Draco source files located in `<blender-root>/extern/draco`.
 
-```
-git clone git@github.com:ux3d/blender_extern_draco.git --recursive
-cd blender_extern_draco
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j 4
-```
+## Changes
 
-## Integration
+Blender does not need to be built locally to test changes in Draco or the bridging code.
 
-The Draco Mesh Compression library for the Blender glTF exported/importer ([glTF-Blender-IO](https://github.com/KhronosGroup/glTF-Blender-IO)) can be overridden at runtime by setting the environment variable `BLENDER_EXTERN_DRACO_LIBRARY_PATH` to the absolute path of the built dynamic library. The library itself is assumed to be called `extern_draco.dll`, `libextern_draco.so` or `libextern_draco.dylib`, depending on the host platform.
+- Build the target `extern_draco`
+- Set the environment variable `BLENDER_EXTERN_DRACO_LIBRARY_PATH` to the built dynamic library
+- Launch Blender and export with compression enabled or inspect the console output if compression options are missing
+
+## Release
+
+- Checkout the Blender source code repository
+- Copy all changed files to `<blender-root>/extern/draco`
+- Open a new Blender Differential
