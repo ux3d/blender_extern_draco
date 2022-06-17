@@ -5,8 +5,8 @@
 ## Release build
 
 ```
-git clone git@github.com:ux3d/Blender_ExternDraco.git --recursive
-cd Blender_ExternDraco
+git clone git@github.com:ux3d/blender_extern_draco.git --recursive
+cd blender_extern_draco
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
